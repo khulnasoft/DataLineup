@@ -1,0 +1,52 @@
+@startuml
+
+class Topic {
+    push()
+    next
+    ack(id)
+}
+
+class Job {
+  cursor
+  completed_at
+}
+
+class  Worker {
+}
+
+class Queue {
+  next()
+  ack(id)
+}
+
+class JobDefinition {
+  period
+  template
+}
+
+class Inventory {
+  fetch(from)
+  push(item)
+}
+
+class Resource {
+}
+
+class Pipeline {
+}
+
+class JobGroup {
+}
+
+class WorkerManager {
+}
+
+Topic "0..1" -- "*" Queue
+Queue "*" -- "*" Resource
+Queue "1" -- "*" Pipeline
+Job *-- Queue
+Job "*" -- "1" JobDefinition
+Job "*" -- "1" Inventory
+JobGroup "1" -- "*" Job
+
+@enduml

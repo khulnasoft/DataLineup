@@ -1,0 +1,33 @@
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupExecutor
+metadata:
+  name: default
+spec:
+  type: ProcessExecutor
+  options:
+    max_workers: 1
+    pool_type: thread
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupExecutor
+metadata:
+  name: pooled
+spec:
+  type: ProcessExecutor
+  options:
+    max_workers: 4
+    pool_type: thread
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupExecutor
+metadata:
+  name: arq
+spec:
+  type: ARQExecutor
+  options:
+    redis_url: "redis://localhost"
+    redis_pool_args:
+      max_connections: 2
+      timeout: 5
+    concurrency: 2

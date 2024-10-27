@@ -1,0 +1,10 @@
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupInventory
+metadata:
+  name: github-identifiers
+spec:
+  type: pyro.datalineup.inventories.DrillerQueryApi
+  options:
+    source: driller_github
+---

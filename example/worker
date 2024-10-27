@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd ${DIR}/.. && pwd )"
+
+export DATALINEUP_ENV="${DATALINEUP_ENV:-development}"
+export DATALINEUP_SETTINGS="example.settings.config"
+export PYTHONPATH="${PYTHONPATH}:$DIR/src"
+export DATALINEUP_STATIC_DEFINITIONS_DIRS="${DATALINEUP_STATIC_DEFINITIONS_DIRS:-${DIR}/definitions}"
+export DATALINEUP_STANDALONE="${DATALINEUP_STANDALONE:-1}"
+exec bash ${ROOT_DIR}/bin/worker

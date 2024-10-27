@@ -1,0 +1,29 @@
+name: Publish
+on:
+  release:
+    types: [published]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.11'
+        architecture: x64
+    - run: pip install poetry==1.5.1 awscli==1.29.4 twine==4.0.2
+    - run: poetry build
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ secrets.AWS_GITHUB_WORKFLOWS_ROLE_ARN }}
+        aws-region: us-east-1
+    - uses: Khulnasoft/python-publish-action@v0.3.2
+      with:
+        AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+        FILES: dist/*

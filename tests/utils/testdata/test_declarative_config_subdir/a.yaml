@@ -1,0 +1,7 @@
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupInventory
+metadata:
+  name: a
+spec:
+  type: test
+  options: {}

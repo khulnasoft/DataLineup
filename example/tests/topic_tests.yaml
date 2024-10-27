@@ -1,0 +1,37 @@
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopicTest
+metadata:
+  name: test-static-topic-1
+spec:
+  selector:
+    topic: static-topic
+  limit: 2
+  skip: 1
+  messages:
+    - id: "1"
+      args: {message: hello-1}
+      tags: {}
+    - id: "2"
+      args: {message: hello-2}
+      tags: {}
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopicTest
+metadata:
+  name: test-static-topic-2
+spec:
+  selector:
+    topic: static-topic
+  messages:
+    - id: "0"
+      args: {message: hello-0}
+      tags: {}
+    - id: "1"
+      args: {message: hello-1}
+      tags: {}
+    - id: "2"
+      args: {message: hello-2}
+      tags: {}
+    - id: "3"
+      args: {message: hello-3}
+      tags: {}

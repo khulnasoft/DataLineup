@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+python -m datalineup_engine.worker_manager.server
