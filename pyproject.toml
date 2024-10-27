@@ -1,0 +1,148 @@
+[tool.poetry]
+name = "datalineup-engine"
+version = "0.5.30"
+description = ""
+readme = "README.md"
+authors = ["Khulnasoft Systems <oss@khulnasoft.systems>"]
+repository = "https://github.com/KhulnaSoft/datalineup"
+keywords = ["data", "collection", "task", "worker", "processing"]
+classifiers = [
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: Developers",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+  "Topic :: System :: Distributed Computing",
+]
+license = "MIT"
+packages = [
+    { include = "datalineup_engine", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+SQLAlchemy = {extras = ["mypy", "asyncio"], version = ">=1.4.29"}
+aiosqlite = "^0.17.0"
+# 3.12 breaks mypy until https://github.com/maxfischer2781/asyncstdlib/pull/140 is fixed.
+asyncstdlib = "^3.10.2, <3.12"
+aio-pika = ">=8.0"
+####################
+## worker-manager ##
+####################
+Flask = {version = "^2.0.2", optional = true }
+PyYAML = "^6.0"
+types-PyYAML = "^6.0.0"
+aiohttp = {extras = ["speedups"], version = "^3.8.0"}
+croniter = "^1.0.15"
+types-croniter = "^1.0.3"
+click = "^8.0.3"
+aiodogstatsd = {version = "^0.16.0", optional = true}
+structlog = ">=21.5.0"
+sentry-sdk = "^1.5.3"
+arq = {version = ">=v0.26.0b1", optional = true}
+limits = {version = "^2.7.0"}
+opentelemetry-api = "^1.13.0"
+opentelemetry-sdk = {version = "^1.13.0", optional = true}
+pydantic = "^2.6.4"
+greenlet = "^2.0.2"
+typing-inspect = "^0.9.0"
+
+[tool.poetry.extras]
+worker-manager = [
+  "Flask",
+]
+arq = [
+  "arq"
+]
+statsd = [
+  "aiodogstatsd",
+]
+structlog = [
+  "structlog",
+]
+sentry = [
+  "sentry-sdk",
+]
+tracer = [
+  "opentelemetry-sdk",
+]
+
+[tool.poetry.group.dev.dependencies]
+nox = "*"
+black = "24.3.0"
+flake8 = "*"
+flake8-bandit = "*"
+flake8-black = "*"
+flake8-bugbear = "*"
+flake8-breakpoint = "*"
+flake8-isort = "*"
+isort = "*"
+mypy = "*"
+mypy-typing-asserts = "*"
+pytest = "*"
+nox-poetry = "*"
+pytest-asyncio = "0.21.1" # Updating will cause issues with the custom asyncio event loop fixtures
+pytest-icdiff = "*"
+pytest-mock = "*"
+freezegun = "*"
+types-freezegun = "*"
+autoflake8 = "*"
+
+[tool.poetry.group.docs.dependencies]
+rstfmt = {version = "^0.0.14", optional = true}
+restructuredtext-lint = {version = "^1.4.0", optional = true}
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = '''
+  --doctest-modules
+  --doctest-ignore-import-errors
+'''
+filterwarnings = [
+  "error",
+  "ignore:distutils Version classes are deprecated.:DeprecationWarning",
+  "ignore:.*/tmp/ray/.*:ResourceWarning",
+  "ignore:.*You should use InstrumentationScope.*:DeprecationWarning",
+  "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
+]
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+known_typing_library = '''
+    typing,
+    typing_extensions,
+'''
+sections = '''
+    FUTURE,
+    TYPING_LIBRARY,
+    STDLIB,
+    THIRDPARTY,
+    FIRSTPARTY,
+    LOCALFOLDER
+'''
+
+[build-system]
+requires = ["poetry_core>=1.0.0", "setuptools"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+mypy_path = ["src", "mypy_stubs"]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+disallow_untyped_calls = true
+namespace_packages = true
+plugins = ["mypy_typing_asserts.mypy_plugin"]
+
+[[tool.mypy.overrides]]
+module = [
+  "nox.*",
+  "nox_poetry.*",
+  "redis.*",
+]
+ignore_missing_imports = true
+
+[tool.doc8]
+max_line_length = 88

@@ -1,0 +1,39 @@
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopic
+metadata:
+  name: provider-topic
+spec:
+  type: PeriodicTopic
+  options:
+    interval: "* * * * * */1"
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupResourcesProvider
+metadata:
+  name: provider
+spec:
+  type: example.resources.ApiKeysProvider
+  resource_type: example.resources.ProviderApiKey
+  options:
+    sync_interval: 4
+    key: "42"
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupJobDefinition
+metadata:
+  name: provider-job-definition
+  labels:
+    owner: team-datalineup
+spec:
+  minimalInterval: "@weekly"
+  template:
+    input:
+      topic: provider-topic
+    output:
+      default:
+        - topic: stdout
+
+    pipeline:
+      name: example.pipelines.echo
+      resources: {"api_key": "example.resources.ProviderApiKey"}
+

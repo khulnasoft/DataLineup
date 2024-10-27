@@ -1,0 +1,47 @@
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopic
+metadata:
+  name: hello-world-topic
+spec:
+  type: StaticTopic
+  options:
+    messages:
+    - {"args": {"word": "hello"}}
+    - {"args": {"word": "world"}}
+    - {"args": {"word": "!"}}
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopic
+metadata:
+  name: stdout
+spec:
+  type: FileTopic
+  options:
+    path: "-"
+    mode: "w"
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupJobDefinition
+metadata:
+  name: hello-world-definition
+spec:
+  minimalInterval: "@weekly"
+  template:
+    input:
+      topic: hello-world-topic
+
+    output:
+      default:
+        - topic: stdout
+
+    pipeline:
+      name: pipelines.capitalize
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupExecutor
+metadata:
+  name: default
+spec:
+  type: ProcessExecutor
+  options:
+    max_workers: 1

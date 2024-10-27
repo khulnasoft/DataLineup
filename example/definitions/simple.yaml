@@ -1,0 +1,216 @@
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopic
+metadata:
+  name: stdout
+spec:
+  type: FileTopic
+  options:
+    path: "-"
+    mode: "w"
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopic
+metadata:
+  name: null-topic
+spec:
+  type: NullTopic
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopic
+metadata:
+  name: logging-error
+spec:
+  type: LoggingTopic
+  options:
+    name: "error-logging-topic"
+    level: "ERROR"
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupTopic
+metadata:
+  name: static-topic
+spec:
+  type: StaticTopic
+  options:
+    messages:
+    - {"id": "0", "args": {"message": "hello-0"}}
+    - {"id": "1", "args": {"message": "hello-1"}}
+    - {"id": "2", "args": {"message": "hello-2"}}
+    - {"id": "3", "args": {"message": "hello-3"}}
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupInventory
+metadata:
+  name: static-inventory
+spec:
+  type: StaticInventory
+  options:
+    items:
+    - {message: hello-0}
+    - {message: hello-1}
+    - {message: hello-2}
+    - {message: hello-3}
+    - {message: hello-4}
+    - {message: hello-5}
+    - {message: hello-6}
+    - {message: hello-7}
+    - {message: hello-8}
+    - {message: hello-9}
+    - {message: hello-10}
+    - {message: hello-11}
+    - {message: hello-12}
+    - {message: hello-13}
+    - {message: hello-14}
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupInventory
+metadata:
+  name: static-inventory-2
+spec:
+  type: StaticInventory
+  options:
+    items:
+    - {message: another-hello-0}
+    - {message: another-hello-1}
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupJobDefinition
+metadata:
+  name: example-job-definition
+  labels:
+    owner: team-datalineup
+spec:
+  minimalInterval: "@weekly"
+  template:
+    input:
+      inventory: static-inventory
+
+    output:
+      default:
+        - topic: stdout
+
+    pipeline:
+      name: example.pipelines.echo
+      resources: {"api_key": "example.resources.TestApiKey"}
+    config:
+      tracer:
+        rate: 0.5
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupJobDefinition
+metadata:
+  name: example-job-error-definition
+  labels:
+    owner: team-datalineup
+spec:
+  minimalInterval: "@weekly"
+  template:
+    input:
+      inventory: static-inventory-2
+
+    output:
+      default:
+        - topic: stdout
+      error::ZeroDivisionError:
+        - topic: logging-error
+        - set_handled: false
+        - republish:
+            channel: default
+            max_retry: 1
+
+    pipeline:
+      name: example.pipelines.echo_with_error
+      resources: {"api_key": "example.resources.TestApiKey"}
+    config:
+      tracer:
+        rate: 0.0
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupJobDefinition
+metadata:
+  name: example-job-ignorable-error-definition
+  labels:
+    owner: team-datalineup
+spec:
+  minimalInterval: "@weekly"
+  template:
+    input:
+      inventory: static-inventory-2
+
+    output:
+      default:
+        - topic: stdout
+      error:.*Ignorable Exception.*:Exception:
+        - topic: null-topic
+
+    pipeline:
+      name: example.pipelines.echo_with_ignorable_error
+      resources: {"api_key": "example.resources.TestApiKey"}
+    config:
+      tracer:
+        rate: 0.0
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupJobDefinition
+metadata:
+  name: example-job-definition-pooled
+  labels:
+    owner: team-datalineup
+spec:
+  minimalInterval: "@weekly"
+  template:
+    input:
+      inventory: static-inventory
+
+    output:
+      default:
+        - topic: stdout
+
+    pipeline:
+      name: example.pipelines.echo
+      resources: {"api_key": "example.resources.TestApiKey"}
+
+    executor: pooled
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupResource
+metadata:
+  name: example-api-key
+spec:
+  type: example.resources.TestApiKey
+  data:
+    key: example-api-key
+  default_delay: 1
+  rate_limit:
+    strategy: moving-window
+    rate_limits:
+    - 50 per hour
+    - 1000 per day
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupJobDefinition
+metadata:
+  name: example-job-with-state
+  labels:
+    owner: team-datalineup
+spec:
+  minimalInterval: "* * * * *"
+  template:
+    input:
+      inventory: static-inventory
+
+    output:
+      default:
+        - topic: stdout
+
+    pipeline:
+      name: example.pipelines.increment_state
+
+    config:
+      job_state:
+        cursors_states_enabled: true
+        cursors_states_namespace: example-namespace
+      job:
+        buffer_size: 5
+

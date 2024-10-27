@@ -1,0 +1,105 @@
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupPipelineTest
+metadata:
+  name: test-echo-pipeline
+spec:
+  selector:
+    job_definition: example-job-definition
+  inventory:
+    - message: override-1
+    - message: override-2
+    - message: override-3
+  resources:
+    example.resources.TestApiKey:
+      name: test-key-1
+      key: test
+  pipeline_results:
+    - outputs:
+        - channel: default
+          args:
+            message: override-1
+      resources: []
+    - outputs:
+        - channel: default
+          args:
+            message: override-2
+      resources: []
+    - outputs:
+        - channel: default
+          args:
+            message: override-3
+      resources: []
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupPipelineTest
+metadata:
+  name: test-echo-pipeline-2
+spec:
+  selector:
+    job_definition: example-job-definition
+  inventory:
+    - message: second-test-hello
+  resources:
+    example.resources.TestApiKey:
+      name: test-key-1
+      key: test
+  pipeline_results:
+    - outputs:
+        - channel: default
+          args:
+            message: second-test-hello
+      resources: []
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupPipelineTest
+metadata:
+  name: test-echo-error-pipeline
+spec:
+  selector:
+    job_definition: example-job-error-definition
+  inventory:
+    - message: test-hello
+  resources:
+    example.resources.TestApiKey:
+      name: test-key-1
+      key: test
+  pipeline_results:
+    - outputs:
+        - channel: error::ZeroDivisionError
+          args:
+            cause: __any__
+            error:
+              type: builtins.ZeroDivisionError
+              module: 'example.pipelines'
+              message: division by zero
+              traceback: __any__
+        - channel: default
+          args:
+            api_key: {key: test, name: test-key-1}
+            message: test-hello
+      resources: []
+---
+apiVersion: datalineup.khulnasoft.io/v1alpha1
+kind: DatalineupPipelineTest
+metadata:
+  name: test-ignorable-error-pipeline
+spec:
+  selector:
+    job_definition: example-job-ignorable-error-definition
+  inventory:
+    - message: test-hello
+  resources:
+    example.resources.TestApiKey:
+      name: test-key-1
+      key: test
+  pipeline_results:
+    - outputs:
+        - channel: error:.*Ignorable Exception.*:Exception
+          args:
+            cause: __any__
+            error:
+              type: builtins.Exception
+              module: 'example.pipelines'
+              message: Ignorable Exception
+              traceback: __any__
+      resources: []
